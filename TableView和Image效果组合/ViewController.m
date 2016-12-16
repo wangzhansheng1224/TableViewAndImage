@@ -118,9 +118,8 @@
         _tableView = [[UITableView alloc]initWithFrame:[UIScreen mainScreen].bounds style:UITableViewStylePlain];
         _tableView.delegate=self;
         _tableView.dataSource=self;
+        _tableView.showsVerticalScrollIndicator=NO;
         _tableView.backgroundColor = [UIColor clearColor];
-        _tableView.tableFooterView=[[UIView alloc]init];
-        _tableView.rowHeight=50;
         _tableView.tableFooterView=self.footerView;
         [self.view addSubview:self.tableView];
     }
