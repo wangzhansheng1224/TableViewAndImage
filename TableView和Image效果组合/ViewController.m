@@ -30,8 +30,9 @@
     self.edgesForExtendedLayout = UIRectEdgeNone;
 //        self.automaticallyAdjustsScrollViewInsets=YES;
     [self initdata];
-    [self.view addSubview:self.tableView];
     [self createTitleView];
+    [self.view addSubview:self.tableView];
+    
 
     // Do any additional setup after loading the view, typically from a nib.
 }
@@ -187,10 +188,7 @@
 #pragma mark -- 核心
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     if (scrollView.contentOffset.y<=0) {
-        
-        [self.view bringSubviewToFront:self.imageView];
-        [self.view bringSubviewToFront:self.headimage];
-        [self.view bringSubviewToFront:self.nameLabel];
+
         CGRect frame=self.imageView.frame;
         frame.size.width=(1-scrollView.contentOffset.y/225)*SCREEN_WIDTH;
         frame.size.height=(1-scrollView.contentOffset.y/225)*225;
@@ -201,7 +199,6 @@
         
     }else{
         
-        [self.view bringSubviewToFront:scrollView];
         CGRect frame=self.imageView.frame;
         frame.origin.y=-scrollView.contentOffset.y/2.5;
         self.imageView.frame=frame;
