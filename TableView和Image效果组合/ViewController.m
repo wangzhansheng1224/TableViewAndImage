@@ -9,20 +9,23 @@
 #import "ViewController.h"
 #define SCREEN_WIDTH [UIScreen mainScreen].bounds.size.width
 #define SCREEN_HEIGHT [UIScreen mainScreen].bounds.size.height
+#define ArrayLazyLoad(x) if (!x) { x = [NSMutableArray new];}return x
 
 @interface ViewController ()<UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic, strong) UITableView *tableView;
-@property (nonatomic, strong) UIImageView *imageView;
-@property (nonatomic, strong) UIImageView *headimage;
+@property (nonatomic, strong) UIImageView *imageView;      //组头背景
+@property (nonatomic, strong) UIImageView *headimage;      //头像
+@property (nonatomic, strong) UILabel *nameLabel;          //名字
 @property (nonatomic, strong) NSMutableArray *imageArr;
 @property (nonatomic, strong) NSMutableArray *nameArr;
+@property (nonatomic, strong) UIView *footerView;          //表尾
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor=[UIColor colorWithWhite:0.98 alpha:1];
+    self.view.backgroundColor=[UIColor colorWithWhite:0.97 alpha:1];
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
 //        self.automaticallyAdjustsScrollViewInsets=YES;
@@ -48,6 +51,7 @@
     [self.nameArr addObject:nameArr3];
 }
 
+#pragma mark -- 组头
 - (void)createTitleView{
     //背景图
     self.imageView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 225)];
@@ -57,10 +61,57 @@
     //头像
     self.headimage=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 80, 80)];
     self.headimage.image=[UIImage imageNamed:@"uc_img_icon"];
+    self.headimage.center=CGPointMake(self.imageView.center.x, self.imageView.center.y-10);
     [self.view addSubview:self.headimage];
-    self.headimage.center=self.imageView.center;
+    
+    //名字
+    self.nameLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 100, 20)];
+    self.nameLabel.text=@"王战胜";
+    self.nameLabel.center=CGPointMake(self.imageView.center.x, CGRectGetMaxY(self.headimage.frame)+20);
+    self.nameLabel.font=[UIFont systemFontOfSize:20];
+    self.nameLabel.textColor=[UIColor whiteColor];
+    self.nameLabel.textAlignment=NSTextAlignmentCenter;
+    [self.view addSubview:self.nameLabel];
 }
 
+- (UIView *)footerView{
+    if (!_footerView) {
+        _footerView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 100)];
+    
+        //版本号
+        UILabel *versionLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 20.0)];
+        versionLabel.font = [UIFont systemFontOfSize:13.0];
+        versionLabel.text = [NSString stringWithFormat:@"版本:%@",[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+        versionLabel.textColor = [UIColor grayColor];
+        versionLabel.textAlignment = NSTextAlignmentCenter;
+        [self.view addSubview:versionLabel];
+        [_footerView addSubview:versionLabel];
+        
+        //版权
+        UILabel *copyRightLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 25,SCREEN_WIDTH, 20.0)];
+        copyRightLabel.font = [UIFont systemFontOfSize:13.0];
+        copyRightLabel.text = @"Beijing Smartdot Technology Co., Ltd Copyright";
+        copyRightLabel.textColor = [UIColor grayColor];
+        copyRightLabel.textAlignment = NSTextAlignmentCenter;
+        copyRightLabel.backgroundColor = [UIColor clearColor];
+        [_footerView addSubview:copyRightLabel];
+        
+        //退出登录
+        UIButton *quitButton=[[UIButton alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(copyRightLabel.frame)+15, SCREEN_WIDTH-100, 40)];
+        [quitButton setTitleColor:[UIColor colorWithRed:226/255.0 green:10/255.0 blue:32/255.0 alpha:1] forState:UIControlStateNormal];
+        [quitButton setTitle:@"退出登录" forState:UIControlStateNormal];
+        quitButton.center=CGPointMake(SCREEN_WIDTH/2, quitButton.center.y);
+        quitButton.titleLabel.font=[UIFont systemFontOfSize:17];
+        quitButton.layer.borderColor=[UIColor colorWithRed:226/255.0 green:10/255.0 blue:32/255.0 alpha:1].CGColor;
+        quitButton.layer.borderWidth=1;
+        quitButton.layer.cornerRadius=5;
+        quitButton.layer.masksToBounds=YES;
+        [_footerView addSubview:quitButton];
+        
+    }
+    return _footerView;
+}
+#pragma mark -- 创建tableView
 - (UITableView *)tableView{
     if (!_tableView) {
         _tableView = [[UITableView alloc]initWithFrame:[UIScreen mainScreen].bounds style:UITableViewStylePlain];
@@ -69,10 +120,12 @@
         _tableView.backgroundColor = [UIColor clearColor];
         _tableView.tableFooterView=[[UIView alloc]init];
         _tableView.rowHeight=50;
+        _tableView.tableFooterView=self.footerView;
         [self.view addSubview:self.tableView];
     }
     return _tableView;
 }
+
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     return [self.nameArr[section] count];
@@ -91,6 +144,7 @@
     cell.imageView.image=[UIImage imageNamed:self.imageArr[indexPath.section][indexPath.row]];
     cell.textLabel.text=self.nameArr[indexPath.section][indexPath.row];
     cell.textLabel.font=[UIFont systemFontOfSize:14];
+    cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     return cell;
 }
 
@@ -99,21 +153,30 @@
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    UIView *view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 225)];
-    view.backgroundColor=[UIColor clearColor];
-    return view;
+    if (section==0) {
+        UIView *view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 225)];
+        view.backgroundColor=[UIColor clearColor];
+        return view;
+    }else{
+        UIView *view=[[UIView alloc]initWithFrame:CGRectMake(0, 0.5, SCREEN_WIDTH, 0.5)];
+        view.backgroundColor=[UIColor colorWithWhite:0.9 alpha:1];
+        return view;
+    }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
     if (section==0) {
         return 225;
     }
-    return 0;
+    return 0.5;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
     UIView *view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 10)];
     view.backgroundColor=[UIColor clearColor];
+    UILabel *line=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 0.5)];
+    line.backgroundColor=[UIColor colorWithWhite:0.9 alpha:1];
+    [view addSubview:line];
     return view;
 }
 
@@ -121,29 +184,37 @@
     return 10;
 }
 
-
-
 #pragma mark -- 核心
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     if (scrollView.contentOffset.y<=0) {
+        
         [self.view bringSubviewToFront:self.imageView];
         [self.view bringSubviewToFront:self.headimage];
+        [self.view bringSubviewToFront:self.nameLabel];
         CGRect frame=self.imageView.frame;
         frame.size.width=(1-scrollView.contentOffset.y/225)*SCREEN_WIDTH;
         frame.size.height=(1-scrollView.contentOffset.y/225)*225;
         frame.origin.x=-(frame.size.width-SCREEN_WIDTH)/2;
         self.imageView.frame=frame;
-        self.headimage.center=self.imageView.center;
+        self.headimage.center=CGPointMake(self.imageView.center.x, self.imageView.center.y-10);
+        self.nameLabel.center=CGPointMake(self.imageView.center.x, CGRectGetMaxY(self.headimage.frame)+20);
         
     }else{
+        
         [self.view bringSubviewToFront:scrollView];
         CGRect frame=self.imageView.frame;
         frame.origin.y=-scrollView.contentOffset.y/2.5;
         self.imageView.frame=frame;
-        self.headimage.center=self.imageView.center;
-
+        self.headimage.center=CGPointMake(self.imageView.center.x, self.imageView.center.y-10);
+        self.nameLabel.center=CGPointMake(self.imageView.center.x, CGRectGetMaxY(self.headimage.frame)+20);
     }
-    
+}
+
+- (void)dealloc{
+    self.tableView=nil;
+    self.nameLabel=nil;
+    self.headimage=nil;
+    self.imageView=nil;
 }
 
 //状态栏白色
@@ -152,16 +223,10 @@
 }
 
 -(NSMutableArray *)imageArr{
-    if (!_imageArr) {
-        _imageArr=[[NSMutableArray alloc]init];
-    }
-    return _imageArr;
+    ArrayLazyLoad(_imageArr);
 }
 
 - (NSMutableArray *)nameArr{
-    if (!_nameArr) {
-        _nameArr=[[NSMutableArray alloc]init];
-    }
-    return _nameArr;
+    ArrayLazyLoad(_nameArr);
 }
 @end
