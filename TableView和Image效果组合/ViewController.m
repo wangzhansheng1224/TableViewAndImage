@@ -26,14 +26,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor=[UIColor colorWithWhite:0.97 alpha:1];
-    
-    self.edgesForExtendedLayout = UIRectEdgeNone;
-//        self.automaticallyAdjustsScrollViewInsets=YES;
     [self initdata];
     [self createTitleView];
     [self.view addSubview:self.tableView];
     
-
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -192,13 +188,18 @@
         frame.size.width=(1-scrollView.contentOffset.y/225)*SCREEN_WIDTH;
         frame.size.height=(1-scrollView.contentOffset.y/225)*225;
         frame.origin.x=-(frame.size.width-SCREEN_WIDTH)/2;
+        frame.origin.y=0;
         self.imageView.frame=frame;
         self.headimage.center=CGPointMake(self.imageView.center.x, self.imageView.center.y-10);
         self.nameLabel.center=CGPointMake(self.imageView.center.x, CGRectGetMaxY(self.headimage.frame)+20);
         
+        
     }else{
         
         CGRect frame=self.imageView.frame;
+        frame.size.width=SCREEN_WIDTH;
+        frame.size.height=225;
+        frame.origin.x=0;
         frame.origin.y=-scrollView.contentOffset.y/2.5;
         self.imageView.frame=frame;
         self.headimage.center=CGPointMake(self.imageView.center.x, self.imageView.center.y-10);
@@ -211,6 +212,10 @@
     self.nameLabel=nil;
     self.headimage=nil;
     self.imageView=nil;
+    self.nameLabel=nil;
+    self.footerView=nil;
+    self.imageArr=nil;
+    self.nameArr=nil;
 }
 
 //状态栏白色
